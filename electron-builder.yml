@@ -1,0 +1,73 @@
+appId: com.purr.app
+productName: Purr
+copyright: Copyright © 2026 Tathagata Sarkar
+directories:
+  buildResources: resources
+  output: dist
+files:
+  - out/**
+  - package.json
+  - resources/icon.png
+  - resources/tray*.png
+  - resources/trayTemplate*.png
+  - LICENSE
+  - THIRD_PARTY_NOTICES.md
+  # The CUDA builds of llama.cpp add ~520 MB; Vulkan covers NVIDIA, AMD and Intel GPUs.
+  - "!node_modules/@node-llama-cpp/*-cuda/**"
+  - "!node_modules/@node-llama-cpp/*-cuda-ext/**"
+  - "!node_modules/node-llama-cpp/llama/gitRelease.bundle"
+  - "!node_modules/node-llama-cpp/templates/**"
+asarUnpack:
+  - out/main/mcp.js
+  - node_modules/sherpa-onnx-*/**
+  - node_modules/@node-llama-cpp/**
+  - node_modules/node-llama-cpp/**
+  - node_modules/koffi/**
+  - node_modules/uiohook-napi/**
+extraResources:
+  - from: resources/bin/${os}
+    to: bin
+    filter: ["**/*"]
+
+win:
+  files:
+    - "!node_modules/@node-llama-cpp/win-arm64/**"
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: resources/icon.png
+  executableName: Purr
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  shortcutName: Purr
+  artifactName: Purr-Setup-${version}.${ext}
+
+mac:
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+    - target: zip
+      arch: [arm64, x64]
+  icon: resources/icon.png
+  category: public.app-category.productivity
+  # "-" = ad-hoc signature, so unsigned builds still launch on Apple Silicon.
+  identity: "-"
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
+  extendInfo:
+    NSMicrophoneUsageDescription: Purr listens only while you hold your dictation shortcut, to turn your speech into text.
+    NSAppleEventsUsageDescription: Purr checks which app you're typing in so it can match your writing style.
+    LSUIElement: false
+  artifactName: Purr-${version}-${arch}.${ext}
+dmg:
+  title: Purr
+
+linux:
+  target: [AppImage]
+  category: Utility
+
+publish: null

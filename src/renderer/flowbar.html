@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; media-src 'self' blob: mediastream:; font-src 'self' data:" />
+    <title>Flow Bar</title>
+  </head>
+  <body>
+    <div id="stack">
+      <div id="cards"></div>
+      <div id="toasts"></div>
+      <button id="pill" class="pill" data-state="hidden" aria-live="polite">
+        <span class="pill-cancel" role="button" aria-label="Cancel dictation">
+          <svg viewBox="0 0 12 12" width="10" height="10"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+        </span>
+        <span class="tally"></span>
+        <span class="bars"></span>
+        <span class="pill-label"></span>
+        <span class="pill-hint"></span>
+        <span class="pill-stop" role="button" aria-label="Stop and insert">
+          <svg viewBox="0 0 12 12" width="10" height="10"><rect x="2.5" y="2.5" width="7" height="7" rx="1.5" fill="currentColor" /></svg>
+        </span>
+      </button>
+    </div>
+    <script type="module" src="./flowbar/main.ts"></script>
+  </body>
+</html>
