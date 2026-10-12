@@ -1,6 +1,8 @@
-import { app, Menu, nativeImage, Tray } from 'electron'
+import { app, Menu, nativeImage, shell, Tray } from 'electron'
 import path from 'path'
 import fs from 'fs'
+
+export const FEEDBACK_URL = 'https://github.com/mailtathagatasarkar-a11y/purr/issues/new?template=feedback.yml'
 
 export interface TrayActions {
   openHub: (route?: string) => void
@@ -36,6 +38,7 @@ export function createTray(a: TrayActions): { tray: Tray; refresh: () => void } 
         { type: 'separator' },
         a.barHidden() ? { label: 'Show Flow Bar', click: () => (a.showBar(), refresh()) } : { label: 'Hide Flow Bar for 1 hour', click: () => (a.hideBarForHour(), refresh()) },
         { label: 'Settings…', click: () => a.openHub('settings') },
+        { label: 'Send feedback…', click: () => void shell.openExternal(FEEDBACK_URL) },
         { type: 'separator' },
         { label: 'Quit Purr', click: () => a.quit() }
       ])

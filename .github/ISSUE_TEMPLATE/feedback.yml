@@ -1,0 +1,74 @@
+name: Feedback
+description: Tell us what worked, what didn't, or what you wish Purr did.
+title: "[Feedback] "
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for trying Purr. Every response is read, and fixes ship in the next release.
+  - type: dropdown
+    id: area
+    attributes:
+      label: What were you doing?
+      options:
+        - Installing or opening Purr
+        - Dictating (holding the shortcut and talking)
+        - Hands-free dictation
+        - Command Mode
+        - Transforms (Polish, Prompt Engineer)
+        - Notes
+        - Settings or model downloads
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: If Purr typed something wrong, paste what you said and what it typed.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Computer
+      options:
+        - Windows
+        - Mac with Apple Silicon (M1 or later)
+        - Mac with Intel
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: engine
+    attributes:
+      label: Where does Purr do the work?
+      options:
+        - On this computer (local)
+        - Cloud (my own API key)
+        - Not set up yet
+  - type: input
+    id: version
+    attributes:
+      label: Purr version
+      description: Settings → About shows it.
+      placeholder: "0.1.1"
+  - type: dropdown
+    id: rating
+    attributes:
+      label: How useful is Purr for you so far?
+      options:
+        - "5 · I use it every day"
+        - "4 · Useful"
+        - "3 · Okay"
+        - "2 · Not much"
+        - "1 · It doesn't work for me"
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else?
+      description: Screenshots help a lot. Don't include API keys or private text.

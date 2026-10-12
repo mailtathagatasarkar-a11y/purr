@@ -192,6 +192,10 @@ async function main(): Promise<void> {
   // Free memory from old audio once a day.
   setInterval(() => store.pruneAudio(), 6 * 3_600_000).unref()
 
+  // PURR_SMOKE=<file>: start up, check every native part loads, write a report, quit.
+  // CI runs this against each built installer before it can be released.
+  if (process.env.PURR_SMOKE) void smokeTest(process.env.PURR_SMOKE, { engineProc, helper, keyboardOk: () => keyboardOk || !!helper?.ownsKeyboard, bar, windows })
+
   // Dev-only: PURR_SNAP=<dir> saves screenshots of the windows (for UI review).
   if (!app.isPackaged && process.env.PURR_SNAP) void snapshots(process.env.PURR_SNAP, windows, bar)
 
@@ -200,6 +204,44 @@ async function main(): Promise<void> {
     void stt.warm(store.settings)
     void llm.warm(store.settings)
   }, 1500)
+}
+
+async function smokeTest(
+  file: string,
+  d: { engineProc: EngineClient; helper: Helper | null; keyboardOk: () => boolean; bar: FlowBar; windows: HubWindows }
+): Promise<void> {
+  const fs = await import('fs')
+  const checks: Record<string, { ok: boolean; detail: string }> = {}
+  const check = async (name: string, fn: () => Promise<string> | string, required = true): Promise<void> => {
+    try {
+      checks[name] = { ok: true, detail: await fn() }
+    } catch (err) {
+      checks[name] = { ok: !required, detail: `${required ? 'FAILED' : 'warning'}: ${(err as Error).message}` }
+    }
+  }
+  await new Promise((r) => setTimeout(r, 8000))
+  await check('flow bar loaded', () => {
+    if (d.bar.win.isDestroyed() || d.bar.win.webContents.isLoading()) throw new Error('Flow Bar page did not load')
+    return 'ok'
+  })
+  await check('hub window', () => {
+    if (!d.windows.hub || d.windows.hub.isDestroyed()) throw new Error('main window did not open')
+    return 'ok'
+  })
+  await check('app detection', async () => {
+    const ctx = await getAppContext()
+    return `${ctx.appName} (${ctx.exe || 'no exe'})`
+  })
+  await check('local engines', async () => JSON.stringify(await d.engineProc.call('selftest', {}, 60_000)))
+  // Optional on CI: the Mac runner can't grant Accessibility, and the helper is optional everywhere.
+  await check('native helper', () => (d.helper?.running ? 'running' : 'not running'), false)
+  await check('keyboard hook', () => {
+    if (!d.keyboardOk()) throw new Error('no keyboard hook (permissions?)')
+    return 'ok'
+  }, false)
+  const ok = Object.values(checks).every((c) => c.ok)
+  fs.writeFileSync(file, JSON.stringify({ ok, version: app.getVersion(), platform: `${process.platform}-${process.arch}`, checks }, null, 2))
+  app.exit(ok ? 0 : 1)
 }
 
 async function snapshots(dir: string, windows: HubWindows, bar: FlowBar): Promise<void> {

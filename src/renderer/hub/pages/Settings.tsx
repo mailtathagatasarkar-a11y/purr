@@ -572,6 +572,11 @@ function About() {
           <p>
             Purr {info?.version} · {info?.platform}
           </p>
+          <p>
+            <Button small variant="primary" onClick={() => void invoke('app:openExternal', 'https://github.com/mailtathagatasarkar-a11y/purr/issues/new?template=feedback.yml')}>
+              Send feedback
+            </Button>
+          </p>
           <p className="muted small">
             Speech recognition by sherpa-onnx with NVIDIA Parakeet (CC-BY-4.0) and OpenAI Whisper (MIT) models. Local AI by llama.cpp via node-llama-cpp with Qwen (Apache-2.0) and Llama 3.2 (Llama Community License). Keyboard hooks by
             libuiohook. Purr is an independent project and is not affiliated with Wispr.

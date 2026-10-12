@@ -42,6 +42,8 @@ jobs:
         env:
           # Unsigned builds. Add CSC_LINK / CSC_KEY_PASSWORD (and APPLE_ID for notarizing) to sign.
           CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Launch the built app and run its self-test
+        run: node scripts/smoke.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: purr-${{ matrix.name }}

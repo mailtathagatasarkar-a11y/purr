@@ -111,6 +111,13 @@ port.on('message', ({ data: msg }) => {
       else if (msg.type === 'stt.warm') result = (recognizerFor(msg.modelType, msg.paths, msg.language ?? ''), { ok: true })
       else if (msg.type === 'llm.complete') result = await complete(msg)
       else if (msg.type === 'llm.warm') result = (await loadLlm(msg.modelPath), { ok: true, gpu: llama?.gpu ?? false })
+      else if (msg.type === 'selftest') {
+        // Load both native engines without a model: proves their binaries shipped for this OS and CPU.
+        sherpa ??= require('sherpa-onnx-node')
+        const nlc = await import('node-llama-cpp')
+        const cpu = await nlc.getLlama({ gpu: false })
+        result = { sherpa: String(sherpa.version ?? 'loaded'), llama: cpu ? 'loaded' : 'missing', platform: `${process.platform}-${process.arch}` }
+      }
       else if (msg.type === 'unload') {
         recognizers.clear()
         if (model) {
