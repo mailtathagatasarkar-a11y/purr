@@ -115,8 +115,9 @@ port.on('message', ({ data: msg }) => {
         // Load both native engines without a model: proves their binaries shipped for this OS and CPU.
         sherpa ??= require('sherpa-onnx-node')
         const nlc = await import('node-llama-cpp')
-        const cpu = await nlc.getLlama({ gpu: false })
-        result = { sherpa: String(sherpa.version ?? 'loaded'), llama: cpu ? 'loaded' : 'missing', platform: `${process.platform}-${process.arch}` }
+        // Same call the app makes. Apple Silicon only ships a Metal build, so a CPU-only request finds nothing there.
+        llama ??= await nlc.getLlama({ gpu: 'auto' })
+        result = { sherpa: String(sherpa.version ?? 'loaded'), llama: `loaded (gpu: ${llama.gpu || 'none'})`, platform: `${process.platform}-${process.arch}` }
       }
       else if (msg.type === 'unload') {
         recognizers.clear()
