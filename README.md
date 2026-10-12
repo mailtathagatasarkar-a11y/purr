@@ -10,9 +10,9 @@ Purr is an independent, clean-room project modeled on Wispr Flow's public featur
 
 ## Install
 
-**Windows:** run `dist/Purr-Setup-0.1.0.exe`. It's unsigned for now, so SmartScreen may warn you. Click *More info → Run anyway*.
+**Windows:** download `Purr-Setup-<version>.exe` from the [latest release](https://github.com/mailtathagatasarkar-a11y/purr/releases/latest) and run it. It's unsigned for now, so SmartScreen may warn you. Click *More info → Run anyway*.
 
-**macOS:** download `Purr-0.1.0-arm64.dmg` (Apple Silicon) or `Purr-0.1.0-x64.dmg` (Intel) from the [latest release](https://github.com/mailtathagatasarkar-a11y/purr/releases/latest) and drag Purr to Applications. It isn't notarized yet, so the first launch says *"Purr" Not Opened*. Click **Done**, open **System Settings → Privacy & Security**, click **Open Anyway** next to *"Purr" was blocked*, enter your password, then open Purr again. Grant **Microphone** and **Accessibility** when asked.
+**macOS:** download the `arm64.dmg` (Apple Silicon) or `x64.dmg` (Intel) from the [latest release](https://github.com/mailtathagatasarkar-a11y/purr/releases/latest) and drag Purr to Applications. It isn't notarized yet, so the first launch says *"Purr" Not Opened*. Click **Done**, open **System Settings → Privacy & Security**, click **Open Anyway** next to *"Purr" was blocked*, enter your password, then open Purr again. Grant **Microphone** and **Accessibility** when asked.
 
 On first launch Purr asks where it should do the work:
 
