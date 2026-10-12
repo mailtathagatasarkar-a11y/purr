@@ -140,6 +140,10 @@ Key files: `src/main/controller.ts` (the dictation flow), `src/main/gestures.ts`
 
 Purr is MIT licensed (see [LICENSE](LICENSE)). It bundles libuiohook (LGPL-3.0) as a separate, replaceable native module, and downloads speech and language models under their own licenses. Details in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
+## Feedback
+
+Tell us what worked or broke in the [Purr feedback form](https://docs.google.com/forms/d/e/1FAIpQLSeaix64Z6WT2gB735oajZK7coogDhDaPLJXYBxQVSN8l0Ag3Q/viewform) (no sign-in needed), or from **Settings → About → Send feedback** in the app. Each answer becomes a public [GitHub issue](https://github.com/mailtathagatasarkar-a11y/purr/issues?q=label%3Afeedback), so leave out personal details and API keys. A daily agent triages new feedback and opens fix PRs, and a person reviews each one before it ships.
+
 ## Contributing
 
 Issues and pull requests are welcome. Run `npm test` and `npm run typecheck` before opening a PR. The macOS helper (`native/mac/PurrHelper.swift`) hasn't been tested on real hardware yet, so Mac reports are especially useful.

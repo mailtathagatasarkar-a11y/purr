@@ -1,8 +1,7 @@
 import { app, Menu, nativeImage, shell, Tray } from 'electron'
 import path from 'path'
 import fs from 'fs'
-
-export const FEEDBACK_URL = 'https://github.com/mailtathagatasarkar-a11y/purr/issues/new?template=feedback.yml'
+import { FEEDBACK_URL } from '../shared/defaults'
 
 export interface TrayActions {
   openHub: (route?: string) => void

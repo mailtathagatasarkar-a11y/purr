@@ -1,5 +1,8 @@
 import type { HotkeyMap, LlmProvider, Settings, SttProvider, Transform } from './types'
 
+/** Google Form; each answer becomes a GitHub issue for the feedback agent. No sign-in needed. */
+export const FEEDBACK_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeaix64Z6WT2gB735oajZK7coogDhDaPLJXYBxQVSN8l0Ag3Q/viewform'
+
 export function defaultHotkeys(platform: string, hasFnKey: boolean): HotkeyMap {
   if (platform === 'darwin') {
     // Same defaults as Wispr Flow: Fn on Apple keyboards, Ctrl+Option otherwise.

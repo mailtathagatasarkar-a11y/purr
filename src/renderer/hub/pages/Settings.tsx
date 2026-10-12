@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { LANGUAGES, LLM_PROVIDERS, STT_PROVIDERS } from '../../../shared/defaults'
+import { FEEDBACK_URL, LANGUAGES, LLM_PROVIDERS, STT_PROVIDERS } from '../../../shared/defaults'
 import type { LlmProvider, ModelInfo, Settings, SttProvider } from '../../../shared/types'
 import { invoke, isMac, useEngineStatus, useKeys, useModels, usePermissions, useSettings } from '../api'
 import { Button, Page, Progress, Row, Section, Segmented, ShortcutField, Toggle } from '../ui'
@@ -573,7 +573,7 @@ function About() {
             Purr {info?.version} · {info?.platform}
           </p>
           <p>
-            <Button small variant="primary" onClick={() => void invoke('app:openExternal', 'https://github.com/mailtathagatasarkar-a11y/purr/issues/new?template=feedback.yml')}>
+            <Button small variant="primary" onClick={() => void invoke('app:openExternal', FEEDBACK_URL)}>
               Send feedback
             </Button>
           </p>
