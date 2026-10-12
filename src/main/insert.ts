@@ -2,12 +2,13 @@
 // Like Wispr Flow: briefly use the clipboard, paste, then restore what was there.
 
 import { clipboard, ClipboardItem } from 'electron'
-import { sendCopy, sendPaste, sendSelectAll } from './native/keys'
+import { sendCopy, sendPaste, sendSelectAll, sendTerminalCopy } from './native/keys'
 
-type ClipSnapshot = Record<string, Blob>
+type ClipSnapshot = Record<string, Blob> | null
 
+/** null = couldn't read the clipboard (locked by another app); restoring then must not clear it. */
 async function snapshot(): Promise<ClipSnapshot> {
-  const out: ClipSnapshot = {}
+  const out: Record<string, Blob> = {}
   try {
     for (const item of await clipboard.read()) {
       for (const type of item.types) {
@@ -22,11 +23,13 @@ async function snapshot(): Promise<ClipSnapshot> {
     }
   } catch (err) {
     console.warn('[clipboard] snapshot failed', err)
+    return null
   }
   return out
 }
 
 async function restore(s: ClipSnapshot): Promise<void> {
+  if (s === null) return
   try {
     if (Object.keys(s).length === 0) clipboard.clear()
     else await clipboard.write([new ClipboardItem(s)])
@@ -66,7 +69,7 @@ export async function pasteText(text: string, opts: PasteOptions): Promise<void>
   const original = pendingRestore ?? (await snapshot())
   if (restoreTimer) clearTimeout(restoreTimer)
   pendingRestore = original
-  debug('snapshot types', Object.keys(original))
+  debug('snapshot types', original ? Object.keys(original) : 'unreadable')
   await clipboard.writeText(text)
   debug('wrote', JSON.stringify(text.slice(0, 40)), 'readback ok:', (await clipboard.readText()) === text)
   await waitForModifiers()
@@ -105,7 +108,7 @@ async function isVsCodeEmptySelection(): Promise<boolean> {
 }
 
 /** Copy the selection with a simulated Ctrl/Cmd+C, then put the clipboard back. */
-export async function readSelection(opts: { selectAllIfEmpty?: boolean } = {}): Promise<{ text: string; wholeField: boolean }> {
+export async function readSelection(opts: { selectAllIfEmpty?: boolean; terminal?: boolean } = {}): Promise<{ text: string; wholeField: boolean }> {
   const original = pendingRestore ?? (await snapshot())
   if (restoreTimer) clearTimeout(restoreTimer)
   restoreTimer = null
@@ -113,7 +116,9 @@ export async function readSelection(opts: { selectAllIfEmpty?: boolean } = {}): 
   const marker = `⁣purr-${Date.now()}`
   const read = async (): Promise<string> => {
     await clipboard.writeText(marker)
-    sendCopy()
+    // In a terminal Ctrl+C interrupts the running program; Ctrl+Insert copies instead.
+    if (opts.terminal) sendTerminalCopy()
+    else sendCopy()
     for (let i = 0; i < 25; i++) {
       await sleep(16)
       const t = await clipboard.readText()

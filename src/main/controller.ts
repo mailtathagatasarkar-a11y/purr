@@ -223,6 +223,8 @@ export class Controller {
     try {
       await this.d.bar.startRecording(this.settings.microphoneId, this.settings.keepMicWarm)
     } catch (err) {
+      // The recorder may still open the mic after we gave up waiting: tell it to stop.
+      this.d.bar.abortRecording()
       if (this.session !== s) return
       this.reset()
       this.d.bar.sound('error')
@@ -337,7 +339,7 @@ export class Controller {
     const d1 = applyDictionary(text, dictionary)
     text = d1.text
     fixes += d1.count
-    const prot = protectSnippets(text, snippets)
+    let prot = protectSnippets(text, snippets)
     text = prot.text
     fixes += prot.count
 
@@ -367,7 +369,13 @@ export class Controller {
       } catch (err) {
         aiError = (err as Error).message
       }
-      if (!usedAi && s.smartFormatting) text = ensureFinalPunctuation(capitalizeSentences(text, !lang || lang === 'en'))
+      if (!usedAi) {
+        // The first pass skipped what it expected the AI to handle (scratch that, spoken punctuation).
+        const det = deterministicClean(raw, { lang, aiWillRun: false, backtrack: s.backtrack, smartFormatting: s.smartFormatting })
+        prot = protectSnippets(applyDictionary(det.text, dictionary).text, snippets)
+        text = prot.text
+        fixes = Math.max(fixes, det.fixes)
+      }
     }
     text = restoreSnippets(text, prot.tokens)
     text = applyDictionary(text, dictionary).text
@@ -487,7 +495,7 @@ export class Controller {
     }
     this.barLabel = 'Thinking'
     this.refreshBar()
-    const sel = await readSelection()
+    const sel = await readSelection({ terminal: ctx.kind === 'terminal' })
     const selected = sel.text.trim()
     let result = ''
     const q = searchQueryFromInstruction(instruction)
@@ -536,7 +544,8 @@ export class Controller {
     this.barLabel = t.name
     this.refreshBar()
     try {
-      const sel = await readSelection({ selectAllIfEmpty: this.settings.transformUseWholeField })
+      const tctx = await ctxPromise
+      const sel = await readSelection({ selectAllIfEmpty: this.settings.transformUseWholeField && tctx.kind !== 'terminal', terminal: tctx.kind === 'terminal' })
       const text = sel.text
       const words = countWords(text)
       if (!words) {
@@ -643,6 +652,7 @@ export class Controller {
       return this.insert(cardText, ctx, true)
     }
     if (actionId === 'undoCancel' && this.cancelled && Date.now() - this.cancelled.at < 15_000) {
+      if (this.state !== 'idle') return this.toast('info', 'Finish the current dictation first, then press Undo.')
       const c = this.cancelled
       this.cancelled = null
       this.state = 'processing'

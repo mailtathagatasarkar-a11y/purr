@@ -1,4 +1,5 @@
 import { app, Menu, powerMonitor, session } from 'electron'
+import type { HotkeyMap } from '../shared/types'
 import { Controller } from './controller'
 import { EngineClient } from './engineClient'
 import { Gestures } from './gestures'
@@ -16,7 +17,8 @@ import { FolderSync } from './sync'
 import { createTray } from './tray'
 import { FlowBar, HubWindows } from './windows'
 
-if (!app.requestSingleInstanceLock()) app.quit()
+const isPrimary = app.requestSingleInstanceLock()
+if (!isPrimary) app.quit()
 
 app.setAppUserModelId('com.purr.app')
 // Keep the recorder and timers running at full speed while hidden.
@@ -46,7 +48,7 @@ async function main(): Promise<void> {
 
   // ---------- keyboard ----------
   const engine = new HotkeyEngine()
-  engine.setBindings(store.settings.hotkeys)
+  engine.setBindings(effectiveHotkeys(store.settings.hotkeys))
   setModifierProbe(() => engine.modifiersDown())
   const keys = new KeySource()
   let keyboardOk = false
@@ -54,12 +56,21 @@ async function main(): Promise<void> {
   // Both sources feed one engine. The helper owns the keyboard when it can (it can
   // swallow shortcut keys); uiohook is the fallback and also covers mouse buttons.
   helper?.on('key', (down, name) => (down ? engine.down(name) : engine.up(name)))
+  // Mouse buttons always come from uiohook: the macOS helper doesn't watch the mouse.
   keys.on('down', (k) => {
-    if (!helper?.ownsKeyboard) engine.down(k)
+    if (!helper?.ownsKeyboard || k.startsWith('Mouse')) engine.down(k)
   })
   keys.on('up', (k) => {
-    if (!helper?.ownsKeyboard) engine.up(k)
+    if (!helper?.ownsKeyboard || k.startsWith('Mouse')) engine.up(k)
   })
+  // Only the macOS helper can see fn. Without it, fn shortcuts fall back to Ctrl+Option
+  // so push-to-talk never goes dead.
+  function effectiveHotkeys(map: HotkeyMap): HotkeyMap {
+    if (process.platform !== 'darwin' || helper?.running) return map
+    const swap = (c: string[]): string[] => (c.includes('Fn') ? [...new Set(c.flatMap((k) => (k === 'Fn' ? ['Ctrl', 'Alt'] : [k === 'Ctrl' ? 'Meta' : k])))] : c)
+    return Object.fromEntries(Object.entries(map).map(([a, chords]) => [a, chords.map(swap)]))
+  }
+  helper?.on('exit', () => engine.setBindings(effectiveHotkeys(store.settings.hotkeys)))
   keyboardOk = keys.start() || !!helper?.ownsKeyboard
   const pushChordsToHelper = (): void => {
     const chords = Object.values(store.settings.hotkeys)
@@ -149,7 +160,7 @@ async function main(): Promise<void> {
   store.on('settings', (s) => {
     void stt.warm(s)
     void llm.warm(s)
-    engine.setBindings(s.hotkeys)
+    engine.setBindings(effectiveHotkeys(s.hotkeys))
     pushChordsToHelper()
     controller.refreshBar()
     refreshTray()
@@ -184,6 +195,9 @@ async function main(): Promise<void> {
   })
   app.on('window-all-closed', () => undefined) // stay in the tray
   // Hook can die across sleep on some systems; restart it.
+  // Key-ups are lost behind the lock screen or a UAC prompt: forget what was held.
+  powerMonitor.on('lock-screen', () => engine.reset())
+  powerMonitor.on('unlock-screen', () => engine.reset())
   powerMonitor.on('resume', () => {
     engine.reset()
     keys.stop()
@@ -234,7 +248,11 @@ async function smokeTest(
   })
   await check('local engines', async () => JSON.stringify(await d.engineProc.call('selftest', {}, 60_000)))
   // Optional on CI: the Mac runner can't grant Accessibility, and the helper is optional everywhere.
-  await check('native helper', () => (d.helper?.running ? 'running' : 'not running'), false)
+  // In CI the helper must be there on Windows and macOS: a silent build failure would ship without it.
+  await check('native helper', () => {
+    if (!d.helper?.running) throw new Error('not running')
+    return 'running'
+  }, !!process.env.CI && process.platform !== 'linux')
   await check('keyboard hook', () => {
     if (!d.keyboardOk()) throw new Error('no keyboard hook (permissions?)')
     return 'ok'
@@ -282,7 +300,7 @@ async function snapshots(dir: string, windows: HubWindows, bar: FlowBar): Promis
   app.quit()
 }
 
-main().catch((err) => {
+if (isPrimary) main().catch((err) => {
   console.error('[purr] failed to start', err)
   app.quit()
 })

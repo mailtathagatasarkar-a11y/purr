@@ -35,8 +35,14 @@ class JsonFile<T> {
     if (this.timer) clearTimeout(this.timer)
     this.timer = null
     const tmp = `${this.file}.tmp`
-    fs.writeFileSync(tmp, JSON.stringify(this.data, null, 1))
-    fs.renameSync(tmp, this.file)
+    try {
+      fs.writeFileSync(tmp, JSON.stringify(this.data, null, 1))
+      fs.renameSync(tmp, this.file)
+    } catch (err) {
+      // Antivirus or the indexer can lock the file for a moment on Windows: try again shortly.
+      console.warn(`[store] could not save ${this.file}, retrying`, err)
+      this.timer = setTimeout(() => this.flush(), 2000)
+    }
   }
 }
 

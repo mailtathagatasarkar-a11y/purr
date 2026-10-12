@@ -61,6 +61,12 @@ export class FolderSync {
         if (name === FILE && !this.writing) setTimeout(() => this.pull(), 300)
       }) as fs.FSWatcher & { purrFile?: string }
       w.purrFile = file
+      // The folder can vanish (unmounted drive, unlinked Dropbox): stop watching instead of crashing.
+      w.on('error', (err) => {
+        this.lastError = `Sync folder unavailable: ${err.message}`
+        w.close()
+        this.watcher = null
+      })
       this.watcher = w
     } catch (err) {
       this.lastError = (err as Error).message

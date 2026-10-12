@@ -44,6 +44,16 @@ export class Helper extends EventEmitter<{ key: [boolean, string]; exit: [] }> {
       return false
     }
     this.running = true
+    // Antivirus blocking the binary, or writing after it died, must not crash Purr.
+    this.proc.on('error', (err) => {
+      console.warn('[helper] failed', err)
+      this.running = false
+      this.ownsKeyboard = false
+    })
+    this.proc.stdin.on('error', () => {
+      this.running = false
+      this.ownsKeyboard = false
+    })
     this.proc.stdout.setEncoding('utf8')
     this.proc.stdout.on('data', (chunk: string) => {
       this.buf += chunk

@@ -69,7 +69,7 @@ let model: { path: string; model: any; context: any } | null = null
 async function loadLlm(modelPath: string): Promise<NonNullable<typeof model>> {
   if (model?.path === modelPath) return model
   const nlc = await import('node-llama-cpp')
-  llama ??= await nlc.getLlama({ gpu: 'auto' })
+  llama ??= await nlc.getLlama({ gpu: 'auto', build: 'never' })
   if (model) {
     await model.context.dispose()
     await model.model.dispose()
@@ -116,7 +116,7 @@ port.on('message', ({ data: msg }) => {
         sherpa ??= require('sherpa-onnx-node')
         const nlc = await import('node-llama-cpp')
         // Same call the app makes. Apple Silicon only ships a Metal build, so a CPU-only request finds nothing there.
-        llama ??= await nlc.getLlama({ gpu: 'auto' })
+        llama ??= await nlc.getLlama({ gpu: 'auto', build: 'never' })
         result = { sherpa: String(sherpa.version ?? 'loaded'), llama: `loaded (gpu: ${llama.gpu || 'none'})`, platform: `${process.platform}-${process.arch}` }
       }
       else if (msg.type === 'unload') {

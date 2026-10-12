@@ -1,7 +1,7 @@
 {
   "name": "purr",
   "productName": "Purr",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Voice dictation that works in every app. Cloud or fully local. Mac + Windows.",
   "main": "./out/main/index.js",
   "author": "Tathagata Sarkar",

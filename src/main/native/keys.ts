@@ -19,8 +19,22 @@ export function keyName(code: number): string {
 export class KeySource extends EventEmitter<{ down: [string]; up: [string]; error: [Error] }> {
   started = false
 
+  private wired = false
+
   start(): boolean {
     if (this.started) return true
+    if (!this.wired) this.wire()
+    try {
+      uIOhook.start()
+      this.started = true
+    } catch (err) {
+      this.emit('error', err as Error)
+    }
+    return this.started
+  }
+
+  private wire(): void {
+    this.wired = true
     uIOhook.on('keydown', (e) => this.emit('down', keyName(e.keycode)))
     uIOhook.on('keyup', (e) => this.emit('up', keyName(e.keycode)))
     uIOhook.on('mousedown', (e) => {
@@ -31,13 +45,6 @@ export class KeySource extends EventEmitter<{ down: [string]; up: [string]; erro
       const b = Number(e.button)
       if (b >= 3) this.emit('up', `Mouse${b}`)
     })
-    try {
-      uIOhook.start()
-      this.started = true
-    } catch (err) {
-      this.emit('error', err as Error)
-    }
-    return this.started
   }
 
   stop(): void {
@@ -60,6 +67,12 @@ export function sendPaste(mode: 'paste' | 'shiftInsert' = 'paste'): void {
 
 export function sendCopy(): void {
   uIOhook.keyTap(UiohookKey.C, [isMac ? UiohookKey.Meta : UiohookKey.Ctrl])
+}
+
+/** Copy in a terminal without sending Ctrl+C (SIGINT). macOS terminals copy with Cmd+C safely. */
+export function sendTerminalCopy(): void {
+  if (isMac) uIOhook.keyTap(UiohookKey.C, [UiohookKey.Meta])
+  else uIOhook.keyTap(UiohookKey.Insert, [UiohookKey.Ctrl])
 }
 
 export function sendSelectAll(): void {

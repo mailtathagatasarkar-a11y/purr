@@ -81,8 +81,7 @@ export function registerIpc(d: IpcDeps): void {
   h('tf:save', (t: Partial<Transform>) => store.saveTransform(t))
   h('tf:delete', (id: string) => {
     store.deleteItem('transforms', id)
-    const { [`transform:${id}`]: _gone, ...rest } = store.settings.hotkeys
-    store.updateSettings({ hotkeys: rest })
+    store.updateSettings({ hotkeys: { [`transform:${id}`]: [] } })
   })
   h('note:save', (n: Partial<Note>) => store.saveNote(n))
   h('note:delete', (id: string) => store.deleteItem('notes', id))
