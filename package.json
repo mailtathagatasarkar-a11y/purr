@@ -1,7 +1,7 @@
 {
   "name": "purr",
   "productName": "Purr",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Voice dictation that works in every app. Cloud or fully local. Mac + Windows.",
   "main": "./out/main/index.js",
   "author": "Tathagata Sarkar",
@@ -16,6 +16,8 @@
     "build:helpers": "node scripts/build-helpers.mjs",
     "dist:win": "node scripts/build-helpers.mjs && electron-vite build && electron-builder --win",
     "dist:mac": "node scripts/build-helpers.mjs && electron-vite build && electron-builder --mac",
+    "dist:mac:arm64": "node scripts/build-helpers.mjs && electron-vite build && electron-builder --mac --arm64",
+    "dist:mac:x64": "node scripts/build-helpers.mjs && electron-vite build && electron-builder --mac --x64",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {

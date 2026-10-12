@@ -23,6 +23,7 @@ asarUnpack:
   - node_modules/@node-llama-cpp/**
   - node_modules/node-llama-cpp/**
   - node_modules/koffi/**
+  - node_modules/@koromix/**
   - node_modules/uiohook-napi/**
 extraResources:
   - from: resources/bin/${os}
@@ -46,10 +47,10 @@ nsis:
 
 mac:
   target:
-    - target: dmg
-      arch: [arm64, x64]
-    - target: zip
-      arch: [arm64, x64]
+    # Each Mac architecture is built on a runner of that architecture, so npm
+    # installs the matching native packages (koffi, sherpa-onnx, llama.cpp).
+    - dmg
+    - zip
   icon: resources/icon.png
   category: public.app-category.productivity
   # "-" = ad-hoc signature, so unsigned builds still launch on Apple Silicon.

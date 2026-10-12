@@ -1,6 +1,8 @@
 // Win32 calls through koffi (prebuilt FFI, no compiler needed).
+// koffi is loaded on first use, never at startup: macOS doesn't use this file,
+// and its koffi binary may not be packaged there.
 
-import koffi from 'koffi'
+type Koffi = typeof import('koffi')
 
 let api: {
   GetForegroundWindow: () => unknown
@@ -14,6 +16,8 @@ let api: {
 
 function load(): NonNullable<typeof api> {
   if (api) return api
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const koffi = require('koffi') as Koffi
   const user32 = koffi.load('user32.dll')
   const kernel32 = koffi.load('kernel32.dll')
   api = {
