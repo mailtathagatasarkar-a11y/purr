@@ -12,7 +12,13 @@ Purr is an independent, clean-room project modeled on Wispr Flow's public featur
 
 **Windows:** download `Purr-Setup-<version>.exe` from the [latest release](https://github.com/mailtathagatasarkar-a11y/purr/releases/latest) and run it. It's unsigned for now, so SmartScreen may warn you. Click *More info → Run anyway*.
 
-**macOS:** download the `arm64.dmg` (Apple Silicon) or `x64.dmg` (Intel) from the [latest release](https://github.com/mailtathagatasarkar-a11y/purr/releases/latest) and drag Purr to Applications. It isn't notarized yet, so the first launch says *"Purr" Not Opened*. Click **Done**, open **System Settings → Privacy & Security**, click **Open Anyway** next to *"Purr" was blocked*, enter your password, then open Purr again. Grant **Microphone** and **Accessibility** when asked.
+**macOS, easiest:** paste this into Terminal. It downloads the right build for your Mac, puts it in Applications and opens it, without the "Not Opened" warning (Terminal downloads aren't flagged the way browser downloads are). It's a short script; [read it first](install.sh) if you like.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mailtathagatasarkar-a11y/purr/main/install.sh | bash
+```
+
+**macOS, manual:** download the `arm64.dmg` (Apple Silicon) or `x64.dmg` (Intel) from the [latest release](https://github.com/mailtathagatasarkar-a11y/purr/releases/latest) and drag Purr to Applications. It isn't notarized yet, so the first launch says *"Purr" Not Opened*. Click **Done**, open **System Settings → Privacy & Security**, click **Open Anyway** next to *"Purr" was blocked*, enter your password, then open Purr again. Grant **Microphone** and **Accessibility** when asked.
 
 On first launch Purr asks where it should do the work:
 
